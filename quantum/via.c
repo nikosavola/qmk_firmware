@@ -294,7 +294,19 @@ __attribute__((weak)) void via_raw_hid_send(uint8_t src, uint8_t *data, uint8_t 
     raw_hid_send(data, length);
 }
 
+#ifdef OPENRGB_ENABLE
+extern uint8_t is_orgb_mode;
+extern void orgb_raw_hid_receive(uint8_t *data, uint8_t length);
+#endif
+
 void raw_hid_receive(uint8_t src, uint8_t *data, uint8_t length) {
+#ifdef OPENRGB_ENABLE
+    if (is_orgb_mode) {
+        orgb_raw_hid_receive(data, length);
+        return;
+    }
+#endif
+
     uint8_t *command_id   = &(data[0]);
     uint8_t *command_data = &(data[1]);
 
