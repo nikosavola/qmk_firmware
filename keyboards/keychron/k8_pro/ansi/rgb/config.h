@@ -28,4 +28,7 @@
 /* RGB Matrix Configuration */
 #    define RGB_MATRIX_LED_COUNT 87
 
+/* Allow shutdown of led driver to save power */
+#    define RGB_MATRIX_DRIVER_SHUTDOWN_ENABLE
+
 #endif
