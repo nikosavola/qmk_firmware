@@ -1,0 +1,31 @@
+name: Build K8 Pro Firmware
+
+on:
+  push:
+    branches:
+      - master
+      - main
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    container: qmkfm/qmk_cli
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+        with:
+          submodules: recursive
+      
+      - name: Install dependencies
+        run: pip3 install -r requirements.txt
+      
+      - name: Build K8 Pro ANSI RGB VIA
+        run: qmk compile -kb keychron/k8_pro/ansi/rgb -km via -j 0
+      
+      - name: Upload firmware
+        uses: actions/upload-artifact@v3
+        with:
+          name: k8-pro-firmware
+          path: '*.bin'

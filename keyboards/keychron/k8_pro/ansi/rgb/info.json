@@ -31,5 +31,8 @@
             "splash": true,
             "solid_splash": true
         }
+    },
+    "via": {
+        "lighting": "qmk_backlight"
     }
 }

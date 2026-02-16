@@ -26,5 +26,8 @@
             "wave_up_down": true,
             "effect_max": true
         }
+    },
+    "via": {
+        "lighting": "qmk_backlight"
     }
 }

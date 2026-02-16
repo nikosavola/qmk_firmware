@@ -129,5 +129,8 @@
             {"matrix":[5, 15], "flags":1, "x":211, "y":64},
             {"matrix":[5, 16], "flags":1, "x":224, "y":64}
         ]
+    },
+    "via": {
+        "lighting": "qmk_backlight"
     }
 }
