@@ -8,6 +8,18 @@
 
 This is a keyboard firmware based on the [tmk\_keyboard firmware](https://github.com/tmk/tmk_keyboard) with some useful features for Atmel AVR and ARM controllers, and more specifically, the [OLKB product line](https://olkb.com), the [ErgoDox EZ](https://ergodox-ez.com) keyboard, and the [Clueboard product line](https://clueboard.co).
 
+## Keychron K8 Pro Configuration
+
+This repository is configured for the Keychron K8 Pro to support both OpenRGB and VIA.
+
+**Important Usage Notes:**
+- In the OpenRGB firmware, you can switch between OpenRGB and VIA mode using `Fn + O`.
+- **OpenRGB mode is enabled by default.** It is recommended to turn it off (using `Fn + O`) for the first configuration in VIA.
+- When OpenRGB mode is enabled, the VIA configuration in the browser will not work.
+- To use VIA again, disable OpenRGB mode using the `Fn + O` key combination.
+
+Currently, this repository is only set up to build the OpenRGB firmware. However, VIA-only firmwares are also included in the `firmwares` directory.
+
 ## Documentation
 
 * [See the official documentation on docs.qmk.fm](https://docs.qmk.fm)
