@@ -30,6 +30,18 @@ Flashing example for this keyboard:
 
 **Reset Key**: Connect the USB cable, toggle mode switch to "Off", hold down the *Esc* key or reset button underneath space bar, then toggle then switch to "Cable".
 
+### OpenRGB support (ansi/rgb)
+
+The `openrgb` keymap on `ansi/rgb` supports both [OpenRGB](https://openrgb.org) and VIA.
+
+**Important Usage Notes:**
+- Switch between OpenRGB and VIA mode with `Fn + O` (Windows layer only).
+- **OpenRGB mode is enabled by default.** Turn it off (`Fn + O`) before configuring lighting in VIA for the first time.
+- While OpenRGB mode is enabled, the VIA lighting configuration in the browser will not work.
+- To use VIA again, disable OpenRGB mode with `Fn + O`.
+
+A pre-built `ansi/rgb:openrgb` firmware is available in `firmware/`.
+
 See the [build environment setup](https://docs.qmk.fm/#/getting_started_build_tools) and the [make instructions](https://docs.qmk.fm/#/getting_started_make_guide) for more information. Brand new to QMK? Start with our [Complete Newbs Guide](https://docs.qmk.fm/#/newbs).
 
 ## Option B: Use Keychron Launcher (no code required)
