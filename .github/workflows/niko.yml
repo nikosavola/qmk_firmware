@@ -12,7 +12,7 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           submodules: recursive
 
@@ -48,7 +48,7 @@ jobs:
         run: uv run --with qmk --with-requirements requirements.txt qmk compile -kb keychron/k8_pro/ansi/rgb -km niko
 
       - name: Upload firmware
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: k8-pro-niko-firmware
           path: "*.bin"
