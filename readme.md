@@ -50,6 +50,9 @@ a typed sequence:
 | **`Fn+L`**, then a sequence | Starts a Super Leader sequence. Currently defined: `B` `O` `O` `T` → reboot to bootloader (for flashing). Sequences live in [`keymaps/niko/super_leader.def`](keyboards/keychron/k8_pro/ansi/rgb/keymaps/niko/super_leader.def) — add more there. |
 | **`Fn+H`** | Repeat Key — replays the last keypress, including any modifiers held at the time. |
 | **`Fn+K`** | Alt Repeat Key — replays the last key's *alternate* action instead (e.g. repeating `C(KC_C)` gives `C(KC_V)`). |
+| **`Fn+Del`** / **`Fn+End`** | Start recording Dynamic Macro 1 / 2. |
+| **`Fn+\`** | Stop recording the macro currently being recorded. |
+| **`Fn+;`** / **`Fn+'`** | Play back Dynamic Macro 1 / 2. |
 
 ## Other enabled features
 
@@ -59,6 +62,9 @@ a typed sequence:
 - **Mouse Turbo Click** — `Fn+P`, hold for rapid clicks, double-tap to lock.
 - **xcase** — `Fn+Y`/`Fn+U`/`Fn+I` for snake/kebab/camelCase, `Fn+J` to turn off.
 - **PaletteFx (reactive)** — keypress-driven RGB, cycle palettes with `RM_HUEU`/`RM_HUED`.
+- **Sentence Case** — auto-capitalizes the first letter of a sentence; on by default, toggle with `Fn+]`.
+- **Autocorrect** — fixes common typos as you finish typing them (70-entry default dictionary);
+  off until enabled once with `Fn+[`, then the setting persists.
 
 ## Credits
 
