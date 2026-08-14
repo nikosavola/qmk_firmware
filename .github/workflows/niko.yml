@@ -1,0 +1,54 @@
+name: niko keymap CI
+
+on:
+  push:
+    branches:
+      - niko
+  workflow_dispatch:
+
+jobs:
+  verify-and-build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v10
+
+      - name: Install ARM/AVR toolchain
+        run: |
+          sudo apt-get update
+          sudo apt-get install --yes \
+              build-essential clang-format diffutils gcc git unzip wget zip \
+              python3-pip binutils-avr gcc-avr avr-libc binutils-arm-none-eabi \
+              gcc-arm-none-eabi libnewlib-arm-none-eabi avrdude dfu-programmer \
+              dfu-util teensy-loader-cli libhidapi-hidraw0 libusb-dev
+
+      - name: qmk lint
+        run: uv run --with qmk --with-requirements requirements.txt qmk lint -kb keychron/k8_pro/ansi/rgb -km niko --strict
+
+      - name: Check C formatting
+        run: |
+          uv run --with qmk --with-requirements requirements.txt qmk format-c \
+              keyboards/keychron/k8_pro/ansi/rgb/keymaps/niko/keymap.c \
+              keyboards/keychron/k8_pro/ansi/rgb/keymaps/niko/config.h
+          git diff --exit-code -- keyboards/keychron/k8_pro/ansi/rgb/keymaps/niko
+
+      - name: Check JSON formatting
+        run: |
+          uv run --with qmk --with-requirements requirements.txt qmk format-json -f keymap -i \
+              keyboards/keychron/k8_pro/ansi/rgb/keymaps/niko/keymap.json
+          git diff --exit-code -- keyboards/keychron/k8_pro/ansi/rgb/keymaps/niko/keymap.json
+
+      - name: Compile niko keymap
+        run: uv run --with qmk --with-requirements requirements.txt qmk compile -kb keychron/k8_pro/ansi/rgb -km niko
+
+      - name: Upload firmware
+        uses: actions/upload-artifact@v4
+        with:
+          name: k8-pro-niko-firmware
+          path: "*.bin"

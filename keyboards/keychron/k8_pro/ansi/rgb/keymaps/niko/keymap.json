@@ -1,9 +1,3 @@
 {
-    "modules": [
-        "getreuer/mouse_turbo_click",
-        "getreuer/palettefx",
-        "getreuer/super_leader",
-        "getreuer/socd_cleaner",
-        "ohshitgorillas/xcase"
-    ]
+    "modules": ["getreuer/mouse_turbo_click", "getreuer/palettefx", "getreuer/super_leader", "getreuer/socd_cleaner", "ohshitgorillas/xcase"]
 }
