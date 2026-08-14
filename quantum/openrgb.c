@@ -22,6 +22,7 @@
 #include "quantum.h"
 #include "openrgb.h"
 #include "raw_hid.h"
+#include "keymap_introspection.h"
 #include "string.h"
 #include <color.h>
 
