@@ -1,0 +1,11 @@
+// Super Leader sequences. Tap LEADER (FN+L), then the sequence keys below,
+// each within SUPER_LEADER_TIMEOUT (default 1000ms) of the last.
+//
+// SEQ_KEY(name, (keys...), output_keycode)
+// SEQ_STR(name, (keys...), "string")
+// SEQ_UNI(name, (keys...), "unicode string")
+//
+// Add more of your own here -- see modules/getreuer/super_leader/README.md.
+
+// LEADER, B, O, O, T -> reboot into the bootloader (for flashing).
+SEQ_KEY(boot, (KC_B, KC_O, KC_O, KC_T), QK_BOOT)
