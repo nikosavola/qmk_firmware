@@ -69,8 +69,9 @@ than one keypress:
 - **Autocorrect** — fixes common typos as you finish typing them (70-entry default dictionary);
   off until enabled once with `Fn+[`, then the setting persists.
 - **SOCD Cleaner** — WASD opposing-direction filtering for gaming, on by default; toggle with
-  `Fn+PgDn`. Fires on firmware keycodes before the OS's Dvorak layer sees anything, so it's
-  unaffected by which OS keyboard layout is active.
+  `Fn+PgDn`, which flashes the board green (on) or red (off) to confirm the new state. Fires on
+  firmware keycodes before the OS's Dvorak layer sees anything, so it's unaffected by which OS
+  keyboard layout is active.
 
 ## Credits
 
