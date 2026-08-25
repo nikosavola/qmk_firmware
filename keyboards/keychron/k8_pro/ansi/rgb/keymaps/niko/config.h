@@ -16,6 +16,38 @@
 
 #pragma once
 
+// This board emulates EEPROM by writing into flash itself. Left to
+// auto-detect, the wear-leveling driver's backward-from-end scan lands its
+// reserved region at 0x08016000 (90112) -- NOT near the true end of this
+// chip's flash -- silently overlapping application code/data once the
+// firmware grows past that point. Every EEPROM write (which happens
+// automatically at boot) then corrupts the overlapping code: the board works
+// right after flashing and fails on the next boot.
+//
+// 256KB total flash and 2KB sectors are the actual, ROM-bootloader-reported
+// geometry, not assumed from the "STM32L432xC" part number: `dfu-util -l`
+// while the board is in its stm32-dfu bootloader (a factory-programmed ROM,
+// entirely separate from and unaffected by this firmware) reports
+// "Internal Flash /0x08000000/0128*0002Kg" -- 128 sectors of 2KB. Pinning
+// this removes the wear_leveling_efl.c `chSysHalt` guard that would
+// otherwise catch a wrong flash size loudly, so if that geometry is ever in
+// doubt, re-verify via `dfu-util -l` before trusting these numbers, and
+// confirm a changed, persisted setting (e.g. RM_NEXT) survives a couple of
+// power cycles -- the 0x0803E800 target was confirmed empty (all 0xFF) via
+// `dfu-util -U` before this was pinned, but an actual write there hasn't
+// independently been verified since.
+#define K8_PRO_FLASH_TOTAL_SIZE (256 * 1024)
+#define K8_PRO_FLASH_SECTOR_SIZE (2 * 1024)
+#define K8_PRO_FLASH_TOTAL_SECTORS (K8_PRO_FLASH_TOTAL_SIZE / K8_PRO_FLASH_SECTOR_SIZE)
+#if (WEAR_LEVELING_BACKING_SIZE % K8_PRO_FLASH_SECTOR_SIZE) != 0
+#    error WEAR_LEVELING_BACKING_SIZE must be a multiple of the flash sector size, or reservation would under-count sectors.
+#endif
+// WEAR_LEVELING_BACKING_SIZE comes from "eeprom.wear_leveling.backing_size"
+// in keyboards/keychron/k8_pro/info.json (via the generated info_config.h).
+#define K8_PRO_EEPROM_RESERVED_SECTORS (WEAR_LEVELING_BACKING_SIZE / K8_PRO_FLASH_SECTOR_SIZE)
+#define WEAR_LEVELING_EFL_FLASH_SIZE K8_PRO_FLASH_TOTAL_SIZE
+#define WEAR_LEVELING_EFL_FIRST_SECTOR (K8_PRO_FLASH_TOTAL_SECTORS - K8_PRO_EEPROM_RESERVED_SECTORS)
+
 // Tap both shifts together to toggle Caps Word, no dedicated key needed.
 // Safe here because this board doesn't enable COMMAND_ENABLE (same chord).
 #define BOTH_SHIFTS_TURNS_ON_CAPS_WORD
