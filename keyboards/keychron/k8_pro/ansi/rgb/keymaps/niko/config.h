@@ -20,10 +20,9 @@
 // Safe here because this board doesn't enable COMMAND_ENABLE (same chord).
 #define BOTH_SHIFTS_TURNS_ON_CAPS_WORD
 
-// PaletteFx: only the keypress-reactive effect (the other 5 are more of a
-// static/ambient look), but keep every palette since RM_HUEU/RM_HUED cycles
-// through them and there's no clear "best" one to pick in advance.
-#define PALETTEFX_REACTIVE_ENABLE
+// PaletteFx: all effects and palettes, cycled with RM_NEXT/RM_PREV and
+// RM_HUEU/RM_HUED respectively.
+#define PALETTEFX_ENABLE_ALL_EFFECTS
 #define PALETTEFX_ENABLE_ALL_PALETTES
 
 // Boot into PaletteFx Reactive with the "Notpink" palette (8th palette,
