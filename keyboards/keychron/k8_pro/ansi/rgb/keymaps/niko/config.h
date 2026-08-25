@@ -25,10 +25,13 @@
 #define PALETTEFX_ENABLE_ALL_EFFECTS
 #define PALETTEFX_ENABLE_ALL_PALETTES
 
-// Boot into PaletteFx Reactive with the "Notpink" palette (8th palette,
-// 0-indexed, in the alphabetical order palettefx.c defines them in) instead
-// of OpenRGB direct mode. Only takes effect on a fresh EEPROM (first flash,
-// or after an eeconfig reset) -- RM_NEXT/RM_HUEU etc. override and persist
-// from then on.
-#define RGB_MATRIX_DEFAULT_MODE RGB_MATRIX_COMMUNITY_MODULE_PALETTEFX_REACTIVE
-#define RGB_MATRIX_DEFAULT_HUE 56
+// Boot into our own PaletteFx Reactive variant (rgb_matrix_user.inc; same as
+// upstream Reactive but fully off at idle instead of a ~25% background glow)
+// with the "Notpink" palette, instead of OpenRGB direct mode. Only takes
+// effect on a fresh EEPROM (first flash, or after an eeconfig reset) --
+// RM_NEXT/RM_HUEU etc. override and persist from then on.
+#define RGB_MATRIX_HUE_STEP 8
+#define RGB_MATRIX_DEFAULT_MODE RGB_MATRIX_CUSTOM_PALETTEFX_REACTIVE_DARK
+// PALETTEFX_NOTPINK (palettefx.h) rather than a hardcoded index, so this
+// can't silently drift if upstream reorders/adds palettes.
+#define RGB_MATRIX_DEFAULT_HUE (RGB_MATRIX_HUE_STEP * PALETTEFX_NOTPINK)

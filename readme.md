@@ -65,7 +65,10 @@ than one keypress:
 - **Mouse Turbo Click** — `Fn+P`, hold for rapid clicks, double-tap to lock.
 - **xcase** — `Fn+Y`/`Fn+U`/`Fn+I` for snake/kebab/camelCase, `Fn+J` to turn off.
 - **PaletteFx** — palette-based RGB effects; cycle effects with `RM_NEXT`/`RM_PREV`, palettes with
-  `RM_HUEU`/`RM_HUED`. Defaults to the reactive effect with the "Notpink" palette.
+  `RM_HUEU`/`RM_HUED`. Defaults to a custom reactive variant
+  ([`rgb_matrix_user.inc`](keyboards/keychron/k8_pro/ansi/rgb/keymaps/niko/rgb_matrix_user.inc))
+  with the "Notpink" palette — same as upstream Reactive, but keys stay fully off at idle instead
+  of a dim background glow.
 - **Sentence Case** — auto-capitalizes the first letter of a sentence; on by default, toggle with `Fn+]`.
 - **Autocorrect** — fixes common typos as you finish typing them (70-entry default dictionary);
   off until enabled once with `Fn+[`, then the setting persists.
