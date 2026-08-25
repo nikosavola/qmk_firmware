@@ -41,7 +41,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
     [MAC_FN] = LAYOUT_tkl_ansi(
         _______,  KC_F1,    KC_F2,    KC_F3,    KC_F4,    KC_F5,    KC_F6,    KC_F7,    KC_F8,    KC_F9,    KC_F10,   KC_F11,   KC_F12,              _______,  _______,  UG_TOGG,
         _______,  BT_HST1,  BT_HST2,  BT_HST3,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,   _______,  _______,  _______,
-        UG_TOGG,  UG_NEXT,  UG_VALU,  UG_HUEU,  UG_SATU,  UG_SPDU,  XCASE_SNAKE, XCASE_KEBAB, XCASE_CAMEL, _______,  TURBO,    AC_TOGG,  SENTENCE_CASE_TOGGLE,  DM_RSTP,   DM_REC1,  DM_REC2,  _______,
+        UG_TOGG,  UG_NEXT,  UG_VALU,  UG_HUEU,  UG_SATU,  UG_SPDU,  XCASE_SNAKE, XCASE_KEBAB, XCASE_CAMEL, _______,  TURBO,    AC_TOGG,  SENTENCE_CASE_TOGGLE,  DM_RSTP,   DM_REC1,  DM_REC2,  SOCDTOG,
         KC_CAPS,  UG_PREV,  UG_VALD,  UG_HUED,  UG_SATD,  UG_SPDD,  QK_REP,   XCASE_OFF, QK_AREP,  LEADER,   DM_PLY1,  DM_PLY2,            _______,
         _______,            _______,  _______,  _______,  _______,  BAT_LVL,  _______,  _______,  _______,  _______,  _______,            _______,             _______,
         _______,  _______,  _______,                                _______,                                _______,  _______,  _______,  _______,   _______,  _______,  _______),
@@ -57,7 +57,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
     [WIN_FN] = LAYOUT_tkl_ansi(
         _______,  KC_BRID,  KC_BRIU,  KC_TASK,  KC_FILE,  UG_VALD,  UG_VALU,  KC_MPRV,  KC_MPLY,  KC_MNXT,  KC_MUTE,  KC_VOLD,  KC_VOLU,             _______,  _______,  UG_TOGG,
         _______,  BT_HST1,  BT_HST2,  BT_HST3,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,   _______,  _______,  _______,
-        UG_TOGG,  UG_NEXT,  UG_VALU,  UG_HUEU,  UG_SATU,  UG_SPDU,  XCASE_SNAKE, XCASE_KEBAB, XCASE_CAMEL, SWITCH_MODE, TURBO,  AC_TOGG,  SENTENCE_CASE_TOGGLE,  DM_RSTP,   DM_REC1,  DM_REC2,  _______,
+        UG_TOGG,  UG_NEXT,  UG_VALU,  UG_HUEU,  UG_SATU,  UG_SPDU,  XCASE_SNAKE, XCASE_KEBAB, XCASE_CAMEL, SWITCH_MODE, TURBO,  AC_TOGG,  SENTENCE_CASE_TOGGLE,  DM_RSTP,   DM_REC1,  DM_REC2,  SOCDTOG,
         KC_CAPS,  UG_PREV,  UG_VALD,  UG_HUED,  UG_SATD,  UG_SPDD,  QK_REP,   XCASE_OFF, QK_AREP,  LEADER,   DM_PLY1,  DM_PLY2,            _______,
         _______,            _______,  _______,  _______,  _______,  BAT_LVL,  _______,  _______,  _______,  _______,  _______,            _______,             _______,
         _______,  _______,  _______,                                _______,                                _______,  _______,  _______,  _______,   _______,  _______,  _______)
@@ -65,18 +65,10 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
 // clang-format on
 
 // SOCD Cleaner: WASD opposing-direction filtering for gaming, enabled by
-// default. Toggle globally with SOCDTOG (bound on a combo below, not a
-// dedicated key -- it's flipped rarely enough that a combo is plenty).
+// default. Toggle globally with SOCDTOG on FN+PgDn.
 socd_cleaner_t socd_opposing_pairs[] = {
     {{KC_W, KC_S}, SOCD_CLEANER_LAST},
     {{KC_A, KC_D}, SOCD_CLEANER_LAST},
-};
-
-// Combos: a way to add bindings without spending a physical key or FN slot.
-// Q+W is an easy two-finger chord in the corner, away from normal typing.
-const uint16_t PROGMEM socd_toggle_combo[] = {KC_Q, KC_W, COMBO_END};
-combo_t                key_combos[]        = {
-    COMBO(socd_toggle_combo, SOCDTOG),
 };
 
 extern uint8_t is_orgb_mode;

@@ -13,7 +13,6 @@ firmware's own QWERTY keycode.
 |---|---|
 | ⬜ standard keycode | 🟩 RGB / system (inherited from the openrgb baseline) |
 | 🟧 added in this keymap | ▫️ transparent — falls through to base |
-| 🔲 part of a combo | |
 
 ### Mac Base
 
@@ -39,14 +38,13 @@ firmware's own QWERTY keycode.
 interactive, Dvorak-aware version of these diagrams — with hover detail — is also kept up to date
 as a Claude artifact; ask if you want the link.)
 
-## Combos and sequences
+## Sequences
 
-A few bindings don't fit in a single key square, since they involve more than one physical key or
-a typed sequence:
+A few bindings don't fit in a single key square, since they trigger off a typed sequence rather
+than one keypress:
 
 | Trigger | Action |
 |---|---|
-| **`Q` + `W`** held together, either base layer | Sends `SOCDTOG`, toggling SOCD Cleaner (on by default) on the W/S and A/D pairs. Fires on firmware keycodes before the OS's Dvorak layer sees anything, so it isn't affected by which OS keyboard layout is active. A combo rather than an `Fn` key since it's flipped rarely — no reason to spend a slot on it. |
 | **`Fn+L`**, then a sequence | Starts a Super Leader sequence. Currently defined: `B` `O` `O` `T` → reboot to bootloader (for flashing). Sequences live in [`keymaps/niko/super_leader.def`](keyboards/keychron/k8_pro/ansi/rgb/keymaps/niko/super_leader.def) — add more there. |
 | **`Fn+H`** | Repeat Key — replays the last keypress, including any modifiers held at the time. |
 | **`Fn+K`** | Alt Repeat Key — replays the last key's *alternate* action instead (e.g. repeating `C(KC_C)` gives `C(KC_V)`). |
@@ -65,6 +63,9 @@ a typed sequence:
 - **Sentence Case** — auto-capitalizes the first letter of a sentence; on by default, toggle with `Fn+]`.
 - **Autocorrect** — fixes common typos as you finish typing them (70-entry default dictionary);
   off until enabled once with `Fn+[`, then the setting persists.
+- **SOCD Cleaner** — WASD opposing-direction filtering for gaming, on by default; toggle with
+  `Fn+PgDn`. Fires on firmware keycodes before the OS's Dvorak layer sees anything, so it's
+  unaffected by which OS keyboard layout is active.
 
 ## Credits
 
