@@ -25,3 +25,11 @@
 // through them and there's no clear "best" one to pick in advance.
 #define PALETTEFX_REACTIVE_ENABLE
 #define PALETTEFX_ENABLE_ALL_PALETTES
+
+// Boot into PaletteFx Reactive with the "Notpink" palette (8th palette,
+// 0-indexed, in the alphabetical order palettefx.c defines them in) instead
+// of OpenRGB direct mode. Only takes effect on a fresh EEPROM (first flash,
+// or after an eeconfig reset) -- RM_NEXT/RM_HUEU etc. override and persist
+// from then on.
+#define RGB_MATRIX_DEFAULT_MODE RGB_MATRIX_COMMUNITY_MODULE_PALETTEFX_REACTIVE
+#define RGB_MATRIX_DEFAULT_HUE 56

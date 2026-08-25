@@ -64,7 +64,8 @@ than one keypress:
 - **Caps Lock → Escape** — `Fn+Caps Lock` sends the actual Caps Lock.
 - **Mouse Turbo Click** — `Fn+P`, hold for rapid clicks, double-tap to lock.
 - **xcase** — `Fn+Y`/`Fn+U`/`Fn+I` for snake/kebab/camelCase, `Fn+J` to turn off.
-- **PaletteFx (reactive)** — keypress-driven RGB, cycle palettes with `RM_HUEU`/`RM_HUED`.
+- **PaletteFx (reactive)** — keypress-driven RGB, cycle palettes with `RM_HUEU`/`RM_HUED`; defaults
+  to the "Notpink" palette.
 - **Sentence Case** — auto-capitalizes the first letter of a sentence; on by default, toggle with `Fn+]`.
 - **Autocorrect** — fixes common typos as you finish typing them (70-entry default dictionary);
   off until enabled once with `Fn+[`, then the setting persists.
