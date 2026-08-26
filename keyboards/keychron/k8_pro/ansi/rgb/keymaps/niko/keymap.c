@@ -17,6 +17,7 @@
 #include QMK_KEYBOARD_H
 #include "keychron_common.h"
 #include "backlit_indicator.h"
+#include "xcase.h"
 
 enum layers {
     MAC_BASE,
@@ -27,6 +28,14 @@ enum layers {
 
 enum custom_keycodes {
     SOCD_TOG_FB = QK_USER_0, // SOCD toggle with an RGB flash to show the new state.
+    // xcase's own XCASE_SNAKE/XCASE_KEBAB hardcode KC_UNDS/KC_MINS as the
+    // delimiter: the *physical* QWERTY minus-key position. Under the Dvorak
+    // layout applied in software, that physical key types "["/"{", not
+    // "-"/"_" -- Dvorak moved "-"/"_" to the physical apostrophe key instead.
+    // These call enable_xcase_with() ourselves with KC_QUOT so the delimiter
+    // Dvorak actually produces is right.
+    XCASE_SNAKE_DVORAK = QK_USER_1,
+    XCASE_KEBAB_DVORAK = QK_USER_2,
 };
 
 #define FN_MAC MO(MAC_FN)
@@ -46,7 +55,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
     [MAC_FN] = LAYOUT_tkl_ansi(
         _______,  KC_F1,    KC_F2,    KC_F3,    KC_F4,    KC_F5,    KC_F6,    KC_F7,    KC_F8,    KC_F9,    KC_F10,   KC_F11,   KC_F12,              _______,  _______,  UG_TOGG,
         _______,  BT_HST1,  BT_HST2,  BT_HST3,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,   _______,  _______,  _______,
-        UG_TOGG,  UG_NEXT,  UG_VALU,  UG_HUEU,  UG_SATU,  UG_SPDU,  XCASE_SNAKE, XCASE_KEBAB, XCASE_CAMEL, _______,  TURBO,    AC_TOGG,  SENTENCE_CASE_TOGGLE,  DM_RSTP,   DM_REC1,  DM_REC2,  SOCD_TOG_FB,
+        UG_TOGG,  UG_NEXT,  UG_VALU,  UG_HUEU,  UG_SATU,  UG_SPDU,  XCASE_SNAKE_DVORAK, XCASE_KEBAB_DVORAK, XCASE_CAMEL, _______,  TURBO,    AC_TOGG,  SENTENCE_CASE_TOGGLE,  DM_RSTP,   DM_REC1,  DM_REC2,  SOCD_TOG_FB,
         KC_CAPS,  UG_PREV,  UG_VALD,  UG_HUED,  UG_SATD,  UG_SPDD,  QK_REP,   XCASE_OFF, QK_AREP,  LEADER,   DM_PLY1,  DM_PLY2,            _______,
         _______,            _______,  _______,  _______,  _______,  BAT_LVL,  _______,  _______,  _______,  _______,  _______,            _______,             _______,
         _______,  _______,  _______,                                _______,                                _______,  _______,  _______,  _______,   _______,  _______,  _______),
@@ -62,7 +71,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
     [WIN_FN] = LAYOUT_tkl_ansi(
         _______,  KC_BRID,  KC_BRIU,  KC_TASK,  KC_FILE,  UG_VALD,  UG_VALU,  KC_MPRV,  KC_MPLY,  KC_MNXT,  KC_MUTE,  KC_VOLD,  KC_VOLU,             _______,  _______,  UG_TOGG,
         _______,  BT_HST1,  BT_HST2,  BT_HST3,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,   _______,  _______,  _______,
-        UG_TOGG,  UG_NEXT,  UG_VALU,  UG_HUEU,  UG_SATU,  UG_SPDU,  XCASE_SNAKE, XCASE_KEBAB, XCASE_CAMEL, SWITCH_MODE, TURBO,  AC_TOGG,  SENTENCE_CASE_TOGGLE,  DM_RSTP,   DM_REC1,  DM_REC2,  SOCD_TOG_FB,
+        UG_TOGG,  UG_NEXT,  UG_VALU,  UG_HUEU,  UG_SATU,  UG_SPDU,  XCASE_SNAKE_DVORAK, XCASE_KEBAB_DVORAK, XCASE_CAMEL, SWITCH_MODE, TURBO,  AC_TOGG,  SENTENCE_CASE_TOGGLE,  DM_RSTP,   DM_REC1,  DM_REC2,  SOCD_TOG_FB,
         KC_CAPS,  UG_PREV,  UG_VALD,  UG_HUED,  UG_SATD,  UG_SPDD,  QK_REP,   XCASE_OFF, QK_AREP,  LEADER,   DM_PLY1,  DM_PLY2,            _______,
         _______,            _______,  _______,  _______,  _______,  BAT_LVL,  _______,  _______,  _______,  _______,  _______,            _______,             _______,
         _______,  _______,  _______,                                _______,                                _______,  _______,  _______,  _______,   _______,  _______,  _______)
@@ -94,6 +103,22 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
                 // since the module itself has no on-keyboard indicator.
                 RGB color = socd_cleaner_enabled ? (RGB){0, 255, 0} : (RGB){255, 0, 0};
                 backlight_indicator_start(250, 250, 3, color);
+            }
+            return false;
+        case XCASE_SNAKE_DVORAK:
+            if (record->event.pressed) {
+                enable_xcase_with(LSFT(KC_QUOT));
+                // enable_xcase_with() only exempts the exact delimiter
+                // keycode (LSFT(KC_QUOT)) from ending xcase, but a real
+                // keypress always arrives as the bare base keycode (shift is
+                // a separate event) -- so manually typing a literal "_" or
+                // "'" here would otherwise prematurely end snake_case mode.
+                add_xcase_exclusion_keycode(KC_QUOT);
+            }
+            return false;
+        case XCASE_KEBAB_DVORAK:
+            if (record->event.pressed) {
+                enable_xcase_with(KC_QUOT);
             }
             return false;
     }

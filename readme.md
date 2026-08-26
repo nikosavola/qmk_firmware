@@ -63,7 +63,9 @@ than one keypress:
 - **Caps Word** — tap both shifts to toggle.
 - **Caps Lock → Escape** — `Fn+Caps Lock` sends the actual Caps Lock.
 - **Mouse Turbo Click** — `Fn+P`, hold for rapid clicks, double-tap to lock.
-- **xcase** — `Fn+Y`/`Fn+U`/`Fn+I` for snake/kebab/camelCase, `Fn+J` to turn off.
+- **xcase** — `Fn+Y`/`Fn+U`/`Fn+I` for snake/kebab/camelCase, `Fn+J` to turn off. Snake/kebab send
+  the delimiter as the physical key Dvorak maps to `_`/`-` (the apostrophe key, not the firmware's
+  QWERTY minus key), so they type the right character instead of `{`/`[`.
 - **PaletteFx** — palette-based RGB effects; cycle effects with `RM_NEXT`/`RM_PREV`, palettes with
   `RM_HUEU`/`RM_HUED`. Defaults to a custom reactive variant
   ([`rgb_matrix_user.inc`](keyboards/keychron/k8_pro/ansi/rgb/keymaps/niko/rgb_matrix_user.inc))
