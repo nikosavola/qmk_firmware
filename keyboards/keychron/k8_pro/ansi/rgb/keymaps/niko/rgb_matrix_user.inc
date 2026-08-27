@@ -1,5 +1,7 @@
 // Same as PaletteFx Reactive (modules/getreuer/palettefx), except LEDs with no
-// nearby keypress stay fully off instead of sitting at a ~25% background glow.
+// nearby keypress stay fully off instead of sitting at a ~25% background glow,
+// and a held key's own LED stays lit at full brightness for as long as it's
+// held, fading out smoothly only after release.
 
 // Needs g_last_hit_tracker, which quantum/rgb_matrix/post_config.h only
 // declares when some other enabled effect (a stock "reactive" animation, in
@@ -14,20 +16,106 @@ RGB_MATRIX_EFFECT(PALETTEFX_REACTIVE_DARK)
 #ifdef RGB_MATRIX_CUSTOM_EFFECT_IMPLS
 
 #include "palettefx.h"
+#include "matrix.h"
+#include "timer.h"
+
+// Bump amplitude as a function of time: ramps up over t=0..32, holds at 255
+// over t=32..55, then decays. Used both for upstream's decay-since-hit (via
+// g_last_hit_tracker's tick) and for our own hold-sustain decay-since-release
+// below -- same curve, so a held key's release fades exactly like a tap's
+// natural decay, just starting from t=55 (the end of the plateau) instead of
+// t=0, with no discontinuity.
+static uint8_t amplitude(uint8_t t) {
+  if (t <= 55) {
+    return (t < 32) ? (4 + 8 * t) : 255;
+  } else {
+    t = (((uint16_t)(255 - t)) * UINT16_C(164)) >> 7;
+    return scale8(t, t);
+  }
+}
+
+// g_last_hit_tracker only records *when* a key was hit, not whether it's
+// still held, and its 8-entry buffer can evict a held key's own entry if
+// enough other keys are hit while it's down. So hold-sustain is tracked
+// entirely separately here, per LED, independent of that shared buffer.
+// Needs the reverse of g_led_config.matrix_co (LED index -> row/col) to ask
+// the matrix scanner directly via matrix_is_on(). Built once, lazily, since
+// g_led_config isn't necessarily populated yet at effect-registration time.
+static uint8_t led_to_row[RGB_MATRIX_LED_COUNT];
+static uint8_t led_to_col[RGB_MATRIX_LED_COUNT];
+static bool sustain_held[RGB_MATRIX_LED_COUNT];
+static bool sustain_decaying[RGB_MATRIX_LED_COUNT];
+static uint32_t sustain_release_time[RGB_MATRIX_LED_COUNT];
+static bool led_lookup_ready = false;
+
+static void ensure_led_lookup(void) {
+  if (led_lookup_ready) { return; }
+  for (uint8_t i = 0; i < RGB_MATRIX_LED_COUNT; ++i) {
+    led_to_row[i] = MATRIX_ROWS;  // Sentinel: no physical key at this LED.
+  }
+  for (uint8_t row = 0; row < MATRIX_ROWS; ++row) {
+    for (uint8_t col = 0; col < MATRIX_COLS; ++col) {
+      const uint8_t led_index = g_led_config.matrix_co[row][col];
+      if (led_index != NO_LED) {
+        led_to_row[led_index] = row;
+        led_to_col[led_index] = col;
+      }
+    }
+  }
+  led_lookup_ready = true;
+}
+
+// Refreshes held/releasing state for every LED with a physical key. Cheap
+// (a couple hundred LEDs at most) and safe to call from every effect
+// invocation, including the chunked re-invocations RGB Matrix makes per
+// frame for large LED counts -- idempotent once a transition is observed.
+static void sustain_update(void) {
+  for (uint8_t led_index = 0; led_index < RGB_MATRIX_LED_COUNT; ++led_index) {
+    if (led_to_row[led_index] == MATRIX_ROWS) { continue; }
+    if (matrix_is_on(led_to_row[led_index], led_to_col[led_index])) {
+      sustain_held[led_index] = true;
+      sustain_decaying[led_index] = false;
+    } else if (sustain_held[led_index]) {
+      // Just released: start the decay clock fresh from the plateau, not
+      // from whatever g_last_hit_tracker's own tick (which never paused
+      // while held) happens to say.
+      sustain_held[led_index] = false;
+      sustain_decaying[led_index] = true;
+      sustain_release_time[led_index] = timer_read32();
+    }
+  }
+}
+
+static uint8_t sustain_amplitude(uint8_t led_index) {
+  if (sustain_held[led_index]) {
+    return 255;
+  }
+  if (sustain_decaying[led_index]) {
+    uint32_t elapsed = timer_elapsed32(sustain_release_time[led_index]);
+    if (elapsed > UINT16_MAX) { elapsed = UINT16_MAX; }
+    const uint16_t t = 55 + scale16by8((uint16_t)elapsed,
+        1 + rgb_matrix_config.speed / 4);
+    if (t <= 255) {
+      return amplitude((uint8_t)t);
+    }
+    sustain_decaying[led_index] = false;  // Decay finished.
+  }
+  return 0;
+}
 
 static bool PALETTEFX_REACTIVE_DARK(effect_params_t* params) {
   RGB_MATRIX_USE_LIMITS(led_min, led_max);
-  const uint16_t* palette = palettefx_get_palette_data();
-  const uint8_t count = g_last_hit_tracker.count;
-
-  uint8_t amplitude(uint8_t t) {  // Bump amplitude as a function of time.
-    if (t <= 55) {
-      return (t < 32) ? (4 + 8 * t) : 255;
-    } else {
-      t = (((uint16_t)(255 - t)) * UINT16_C(164)) >> 7;
-      return scale8(t, t);
+  ensure_led_lookup();
+  if (params->init) {
+    for (uint8_t i = 0; i < RGB_MATRIX_LED_COUNT; ++i) {
+      sustain_held[i] = false;
+      sustain_decaying[i] = false;
     }
   }
+  sustain_update();
+
+  const uint16_t* palette = palettefx_get_palette_data();
+  const uint8_t count = g_last_hit_tracker.count;
 
   uint8_t hit_amplitude[LED_HITS_TO_REMEMBER] = {0};
   for (uint8_t j = 0; j < count; ++j) {
@@ -40,7 +128,7 @@ static bool PALETTEFX_REACTIVE_DARK(effect_params_t* params) {
 
   for (uint8_t i = led_min; i < led_max; ++i) {
     RGB_MATRIX_TEST_LED_FLAGS();
-    uint8_t value = 0;
+    uint8_t value = sustain_amplitude(i);
 
     for (uint8_t j = 0; j < count; ++j) {
       if (hit_amplitude[j] == 0) { continue; }

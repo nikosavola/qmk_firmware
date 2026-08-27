@@ -70,7 +70,8 @@ than one keypress:
   `RM_HUEU`/`RM_HUED`. Defaults to a custom reactive variant
   ([`rgb_matrix_user.inc`](keyboards/keychron/k8_pro/ansi/rgb/keymaps/niko/rgb_matrix_user.inc))
   with the "Notpink" palette — same as upstream Reactive, but keys stay fully off at idle instead
-  of a dim background glow.
+  of a dim background glow, and stay lit at full brightness for as long as a key is held (rather
+  than decaying on a fixed clock from the moment it was pressed), fading out smoothly once released.
 - **Sentence Case** — auto-capitalizes the first letter of a sentence; on by default, toggle with `Fn+]`.
 - **Autocorrect** — fixes common typos as you finish typing them (70-entry default dictionary);
   off until enabled once with `Fn+[`, then the setting persists.
