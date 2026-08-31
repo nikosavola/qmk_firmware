@@ -80,6 +80,49 @@ than one keypress:
   firmware keycodes before the OS's Dvorak layer sees anything, so it's unaffected by which OS
   keyboard layout is active.
 
+## Fork lineage
+
+```mermaid
+flowchart TD
+    QMK["qmk/qmk_firmware<br>(mainline QMK)"]
+    Keychron["Keychron/qmk_firmware<br>branch: 2025q3<br>(adds K8 Pro board support --<br>never upstreamed to mainline QMK)"]
+    Ferrhat["Ferrhat/qmk_firmware_k8_pro<br>(adds OpenRGB support;<br>frozen at a ~Dec 2022 snapshot)"]
+    ThisRepo["nikosavola/qmk_firmware<br>(this repo)"]
+    OpenRGBBranch["k8_pro_openrgb_ansi_2025q3<br>(OpenRGB commits replayed onto<br>Keychron's current 2025q3)"]
+    NikoBranch["niko (this branch)<br>personal keymap"]
+
+    QMK -->|forked| Keychron
+    Keychron -->|forked| Ferrhat
+    Keychron -->|forked| ThisRepo
+    Ferrhat -.->|OpenRGB commits<br>replayed by hand, not merged| OpenRGBBranch
+    ThisRepo --> OpenRGBBranch
+    OpenRGBBranch --> NikoBranch
+```
+
+K8 Pro (and every K/Q Pro wireless board) only exists in Keychron's own fork — it was never
+upstreamed to mainline QMK, so there's no direct QMK → K8 Pro path. OpenRGB support for it was
+added separately in [Ferrhat's fork](https://github.com/Ferrhat/qmk_firmware_k8_pro), which froze
+at an old Keychron snapshot; rather than merge that stale history, the OpenRGB-specific commits
+were replayed (original authorship preserved) onto Keychron's actively-updated `2025q3` branch to
+get `k8_pro_openrgb_ansi_2025q3`, which this `niko` branch builds on.
+
+### Pulling upstream changes
+
+Upstream changes should come from **Keychron's `2025q3` branch** — not mainline QMK (the board
+doesn't exist there) and not Ferrhat's fork (frozen, already fully absorbed). Rebase this branch
+onto Keychron's latest, keeping the OpenRGB + niko-keymap delta on top:
+
+```sh
+git remote add keychron https://github.com/Keychron/qmk_firmware.git  # once
+git fetch keychron 2025q3
+git rebase keychron/2025q3 niko
+```
+
+The delta is small and self-contained (`quantum/openrgb.c`/`.h`, a few `rgb_matrix`/`via.c` hooks,
+and the `keychron/k8_pro/ansi/rgb` keyboard + keymap files), so conflicts should be rare. Recompile
+afterward to catch any base drift:
+`uv run --with qmk --with-requirements requirements.txt qmk compile -kb keychron/k8_pro/ansi/rgb -km niko`.
+
 ## Credits
 
 - [Keychron/qmk_firmware](https://github.com/Keychron/qmk_firmware)
