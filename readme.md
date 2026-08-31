@@ -84,12 +84,12 @@ than one keypress:
 
 ```mermaid
 flowchart TD
-    QMK["qmk/qmk_firmware<br>(mainline QMK)"]
-    Keychron["Keychron/qmk_firmware<br>branch: 2025q3<br>(adds K8 Pro board support --<br>never upstreamed to mainline QMK)"]
-    Ferrhat["Ferrhat/qmk_firmware_k8_pro<br>(adds OpenRGB support;<br>frozen at a ~Dec 2022 snapshot)"]
-    ThisRepo["nikosavola/qmk_firmware<br>(this repo)"]
-    OpenRGBBranch["k8_pro_openrgb_ansi_2025q3<br>(OpenRGB commits replayed onto<br>Keychron's current 2025q3)"]
-    NikoBranch["niko (this branch)<br>personal keymap"]
+    QMK["<a href='https://github.com/qmk/qmk_firmware' style='color:#fff'>qmk/qmk_firmware</a><br>(mainline QMK)"]
+    Keychron["<a href='https://github.com/Keychron/qmk_firmware/tree/2025q3' style='color:#fff'>Keychron/qmk_firmware</a><br>branch: 2025q3<br>(adds K8 Pro board support --<br>never upstreamed to mainline QMK)"]
+    Ferrhat["<a href='https://github.com/Ferrhat/qmk_firmware_k8_pro' style='color:#fff'>Ferrhat/qmk_firmware_k8_pro</a><br>(adds OpenRGB support;<br>frozen at a ~Dec 2022 snapshot)"]
+    ThisRepo["<a href='https://github.com/nikosavola/qmk_firmware' style='color:#fff'>nikosavola/qmk_firmware</a><br>(this repo)"]
+    OpenRGBBranch["<a href='https://github.com/nikosavola/qmk_firmware/tree/k8_pro_openrgb_ansi_2025q3' style='color:#fff'>k8_pro_openrgb_ansi_2025q3</a><br>(OpenRGB commits replayed onto<br>Keychron's current 2025q3)"]
+    NikoBranch["<a href='https://github.com/nikosavola/qmk_firmware/tree/niko' style='color:#fff'>niko</a> (this branch)<br>personal keymap"]
 
     QMK -->|forked| Keychron
     Keychron -->|forked| Ferrhat
@@ -97,6 +97,18 @@ flowchart TD
     Ferrhat -.->|OpenRGB commits<br>replayed by hand, not merged| OpenRGBBranch
     ThisRepo --> OpenRGBBranch
     OpenRGBBranch --> NikoBranch
+
+    classDef root fill:#64748b,stroke:#334155,stroke-width:1px,color:#fff
+    classDef keychron fill:#2563eb,stroke:#1e3a8a,stroke-width:1px,color:#fff
+    classDef stale fill:#d97706,stroke:#78350f,stroke-width:1px,color:#fff,stroke-dasharray: 4 3
+    classDef mine fill:#0d9488,stroke:#134e4a,stroke-width:1px,color:#fff
+    classDef active fill:#7c3aed,stroke:#4c1d95,stroke-width:3px,color:#fff
+
+    class QMK root
+    class Keychron keychron
+    class Ferrhat stale
+    class ThisRepo,OpenRGBBranch mine
+    class NikoBranch active
 ```
 
 K8 Pro (and every K/Q Pro wireless board) only exists in Keychron's own fork — it was never
