@@ -83,13 +83,14 @@ than one keypress:
 ## Fork lineage
 
 ```mermaid
+%%{init: {"theme": "base", "themeVariables": {"primaryTextColor": "#1e293b", "edgeLabelBackground": "#f1f5f9", "lineColor": "#64748b"}, "flowchart": {"curve": "linear"}}}%%
 flowchart TD
-    QMK["<a href='https://github.com/qmk/qmk_firmware' style='color:#fff'>qmk/qmk_firmware</a><br>(mainline QMK)"]
-    Keychron["<a href='https://github.com/Keychron/qmk_firmware/tree/2025q3' style='color:#fff'>Keychron/qmk_firmware</a><br>branch: 2025q3<br>(adds K8 Pro board support --<br>never upstreamed to mainline QMK)"]
-    Ferrhat["<a href='https://github.com/Ferrhat/qmk_firmware_k8_pro' style='color:#fff'>Ferrhat/qmk_firmware_k8_pro</a><br>(adds OpenRGB support;<br>frozen at a ~Dec 2022 snapshot)"]
-    ThisRepo["<a href='https://github.com/nikosavola/qmk_firmware' style='color:#fff'>nikosavola/qmk_firmware</a><br>(this repo)"]
-    OpenRGBBranch["<a href='https://github.com/nikosavola/qmk_firmware/tree/k8_pro_openrgb_ansi_2025q3' style='color:#fff'>k8_pro_openrgb_ansi_2025q3</a><br>(OpenRGB commits replayed onto<br>Keychron's current 2025q3)"]
-    NikoBranch["<a href='https://github.com/nikosavola/qmk_firmware/tree/niko' style='color:#fff'>niko</a> (this branch)<br>personal keymap"]
+    QMK["<a href='https://github.com/qmk/qmk_firmware'>qmk/qmk_firmware</a><br>(mainline QMK)"]
+    Keychron["<a href='https://github.com/Keychron/qmk_firmware/tree/2025q3'>Keychron/qmk_firmware</a><br>branch: 2025q3<br>(adds K8 Pro board support --<br>never upstreamed to mainline QMK)"]
+    Ferrhat["<a href='https://github.com/Ferrhat/qmk_firmware_k8_pro'>Ferrhat/qmk_firmware_k8_pro</a><br>(adds OpenRGB support;<br>frozen at a ~Dec 2022 snapshot)"]
+    ThisRepo["<a href='https://github.com/nikosavola/qmk_firmware'>nikosavola/qmk_firmware</a><br>(this repo)"]
+    OpenRGBBranch["<a href='https://github.com/nikosavola/qmk_firmware/tree/k8_pro_openrgb_ansi_2025q3'>k8_pro_openrgb_ansi_2025q3</a><br>(OpenRGB commits replayed onto<br>Keychron's current 2025q3)"]
+    NikoBranch["<a href='https://github.com/nikosavola/qmk_firmware/tree/niko'>niko</a> (this branch)<br>personal keymap"]
 
     QMK -->|forked| Keychron
     Keychron -->|forked| Ferrhat
@@ -98,11 +99,11 @@ flowchart TD
     ThisRepo --> OpenRGBBranch
     OpenRGBBranch --> NikoBranch
 
-    classDef root fill:#64748b,stroke:#334155,stroke-width:1px,color:#fff
-    classDef keychron fill:#2563eb,stroke:#1e3a8a,stroke-width:1px,color:#fff
-    classDef stale fill:#d97706,stroke:#78350f,stroke-width:1px,color:#fff,stroke-dasharray: 4 3
-    classDef mine fill:#0d9488,stroke:#134e4a,stroke-width:1px,color:#fff
-    classDef active fill:#7c3aed,stroke:#4c1d95,stroke-width:3px,color:#fff
+    classDef root fill:#f1f5f9,stroke:#94a3b8,stroke-width:1px,color:#1e293b
+    classDef keychron fill:#fef3c7,stroke:#ca8a04,stroke-width:1px,color:#1e293b
+    classDef stale fill:#ffedd5,stroke:#c2410c,stroke-width:1px,color:#1e293b,stroke-dasharray: 4 3
+    classDef mine fill:#dcfce7,stroke:#16a34a,stroke-width:1px,color:#1e293b
+    classDef active fill:#fae8ff,stroke:#c026d3,stroke-width:3px,color:#1e293b
 
     class QMK root
     class Keychron keychron
