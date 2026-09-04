@@ -18,11 +18,19 @@
 #include "keychron_common.h"
 #include "backlit_indicator.h"
 #include "xcase.h"
+#include "motion_macros.h"
 
+// Order here is numeric layer priority, not OS-mode grouping: QMK resolves a
+// keypress against the highest-numbered *active* layer that defines it. GAME
+// must outrank both base layers (so its overlay wins while toggled on), but
+// must NOT outrank either FN layer -- otherwise holding FN while GAME is on
+// would let GAME's motion-macro keycodes shadow FN's RGB/system shortcuts at
+// the same physical positions (Tab/F/R/C) instead of falling through to them.
 enum layers {
     MAC_BASE,
-    MAC_FN,
     WIN_BASE,
+    GAME, // Toggled overlay (FN+Enter); sits above both Mac and Windows base layers.
+    MAC_FN,
     WIN_FN,
 };
 
@@ -36,6 +44,11 @@ enum custom_keycodes {
     // Dvorak actually produces is right.
     XCASE_SNAKE_DVORAK = QK_USER_1,
     XCASE_KEBAB_DVORAK = QK_USER_2,
+    GAME_TOG           = QK_USER_3, // Toggle the GAME layer, with an RGB flash.
+    MACRO_FACE_TOG     = QK_USER_4, // Flip which side the motion macros treat as "forward".
+    MACRO_HALF_CIRCLE  = QK_USER_5,
+    MACRO_DP           = QK_USER_6,
+    MACRO_360          = QK_USER_7,
 };
 
 #define FN_MAC MO(MAC_FN)
@@ -56,7 +69,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
         _______,  KC_F1,    KC_F2,    KC_F3,    KC_F4,    KC_F5,    KC_F6,    KC_F7,    KC_F8,    KC_F9,    KC_F10,   KC_F11,   KC_F12,              _______,  _______,  UG_TOGG,
         _______,  BT_HST1,  BT_HST2,  BT_HST3,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,   _______,  _______,  _______,
         UG_TOGG,  UG_NEXT,  UG_VALU,  UG_HUEU,  UG_SATU,  UG_SPDU,  XCASE_SNAKE_DVORAK, XCASE_KEBAB_DVORAK, XCASE_CAMEL, _______,  TURBO,    AC_TOGG,  SENTENCE_CASE_TOGGLE,  DM_RSTP,   DM_REC1,  DM_REC2,  SOCD_TOG_FB,
-        KC_CAPS,  UG_PREV,  UG_VALD,  UG_HUED,  UG_SATD,  UG_SPDD,  QK_REP,   XCASE_OFF, QK_AREP,  LEADER,   DM_PLY1,  DM_PLY2,            _______,
+        KC_CAPS,  UG_PREV,  UG_VALD,  UG_HUED,  UG_SATD,  UG_SPDD,  QK_REP,   XCASE_OFF, QK_AREP,  LEADER,   DM_PLY1,  DM_PLY2,            GAME_TOG,
         _______,            _______,  _______,  _______,  _______,  BAT_LVL,  _______,  _______,  _______,  _______,  _______,            _______,             _______,
         _______,  _______,  _______,                                _______,                                _______,  _______,  _______,  _______,   _______,  _______,  _______),
 
@@ -72,8 +85,21 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
         _______,  KC_BRID,  KC_BRIU,  KC_TASK,  KC_FILE,  UG_VALD,  UG_VALU,  KC_MPRV,  KC_MPLY,  KC_MNXT,  KC_MUTE,  KC_VOLD,  KC_VOLU,             _______,  _______,  UG_TOGG,
         _______,  BT_HST1,  BT_HST2,  BT_HST3,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,   _______,  _______,  _______,
         UG_TOGG,  UG_NEXT,  UG_VALU,  UG_HUEU,  UG_SATU,  UG_SPDU,  XCASE_SNAKE_DVORAK, XCASE_KEBAB_DVORAK, XCASE_CAMEL, SWITCH_MODE, TURBO,  AC_TOGG,  SENTENCE_CASE_TOGGLE,  DM_RSTP,   DM_REC1,  DM_REC2,  SOCD_TOG_FB,
-        KC_CAPS,  UG_PREV,  UG_VALD,  UG_HUED,  UG_SATD,  UG_SPDD,  QK_REP,   XCASE_OFF, QK_AREP,  LEADER,   DM_PLY1,  DM_PLY2,            _______,
+        KC_CAPS,  UG_PREV,  UG_VALD,  UG_HUED,  UG_SATD,  UG_SPDD,  QK_REP,   XCASE_OFF, QK_AREP,  LEADER,   DM_PLY1,  DM_PLY2,            GAME_TOG,
         _______,            _______,  _______,  _______,  _______,  BAT_LVL,  _______,  _______,  _______,  _______,  _______,            _______,             _______,
+        _______,  _______,  _______,                                _______,                                _______,  _______,  _______,  _______,   _______,  _______,  _______),
+
+    // Motion-macro overlay (see motion_macros.h). Everything else stays
+    // transparent -- Ins/Del/Home/End/PgUp/PgDn (attack buttons) and Ctrl
+    // (grab) already send themselves on the base layer, no remap needed.
+    // Enter/`/Backspace/LShift are earmarked for future macros, left
+    // transparent (still type normally) until those are defined.
+    [GAME] = LAYOUT_tkl_ansi(
+        _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,             _______,  _______,  _______,
+        _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,   _______,  _______,  _______,
+        MACRO_FACE_TOG, _______, _______, _______, MACRO_DP, _______, _______, _______, _______, _______, _______,  _______,  _______,  _______,   _______,  _______,  _______,
+        _______,  _______,  _______,  _______,  MACRO_HALF_CIRCLE, _______, _______, _______, _______, _______, _______,  _______,            _______,
+        _______,            _______,  _______,  MACRO_360, _______, _______, _______, _______, _______,  _______,  _______,            _______,             _______,
         _______,  _______,  _______,                                _______,                                _______,  _______,  _______,  _______,   _______,  _______,  _______)
 };
 // clang-format on
@@ -119,6 +145,35 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
         case XCASE_KEBAB_DVORAK:
             if (record->event.pressed) {
                 enable_xcase_with(KC_QUOT);
+            }
+            return false;
+        case GAME_TOG:
+            if (record->event.pressed) {
+                layer_invert(GAME);
+                RGB color = layer_state_is(GAME) ? (RGB){0, 200, 255} : (RGB){128, 128, 128};
+                backlight_indicator_start(250, 250, 3, color);
+            }
+            return false;
+        case MACRO_FACE_TOG:
+            if (record->event.pressed) {
+                motion_toggle_facing();
+                RGB color = motion_facing_right ? (RGB){255, 180, 0} : (RGB){180, 0, 255};
+                backlight_indicator_start(250, 250, 2, color);
+            }
+            return false;
+        case MACRO_HALF_CIRCLE:
+            if (record->event.pressed) {
+                motion_play(MOTION_HALF_CIRCLE, ARRAY_SIZE(MOTION_HALF_CIRCLE));
+            }
+            return false;
+        case MACRO_DP:
+            if (record->event.pressed) {
+                motion_play(MOTION_DP, ARRAY_SIZE(MOTION_DP));
+            }
+            return false;
+        case MACRO_360:
+            if (record->event.pressed) {
+                motion_play(MOTION_360, ARRAY_SIZE(MOTION_360));
             }
             return false;
     }

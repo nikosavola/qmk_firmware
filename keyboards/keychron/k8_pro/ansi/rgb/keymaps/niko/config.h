@@ -60,6 +60,10 @@
 // even after an explicit NK_OFF, whereas this only sets the EEPROM default.
 #define NKRO_DEFAULT_ON true
 
+// VIA defaults this to 4, matching MAC_BASE/MAC_FN/WIN_BASE/WIN_FN. The GAME
+// layer added a 5th.
+#define DYNAMIC_KEYMAP_LAYER_COUNT 5
+
 // PaletteFx: all effects and palettes, cycled with RM_NEXT/RM_PREV and
 // RM_HUEU/RM_HUED respectively.
 #define PALETTEFX_ENABLE_ALL_EFFECTS
