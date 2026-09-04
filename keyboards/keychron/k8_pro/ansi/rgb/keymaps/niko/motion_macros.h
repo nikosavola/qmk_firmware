@@ -83,17 +83,20 @@ static const uint8_t MOTION_360[] = {
 static uint32_t motion_rng_state;
 static bool     motion_rng_seeded = false;
 
-// xorshift32 -- doesn't need to be a good PRNG, just non-repeating.
+// splitmix32: two multiply-mix rounds -- much better bit distribution than plain xorshift (whose
+// low bits are weak), no zero-state lockup to guard against, and still just a handful of cycles
+// on this MCU's single-cycle hardware multiplier.
 static uint32_t motion_next_rand(void) {
-    motion_rng_state ^= motion_rng_state << 13;
-    motion_rng_state ^= motion_rng_state >> 17;
-    motion_rng_state ^= motion_rng_state << 5;
-    return motion_rng_state;
+    motion_rng_state += 0x9E3779B9u;
+    uint32_t z = motion_rng_state;
+    z          = (z ^ (z >> 16)) * 0x21F0AAADu;
+    z          = (z ^ (z >> 15)) * 0x735A2D97u;
+    return z ^ (z >> 15);
 }
 
 static uint8_t motion_jittered_step_ms(void) {
     if (!motion_rng_seeded) {
-        motion_rng_state  = timer_read32() | 1; // Must stay non-zero or xorshift gets stuck at 0.
+        motion_rng_state  = timer_read32();
         motion_rng_seeded = true;
     }
     const uint8_t jitter = motion_next_rand() % (2 * MOTION_STEP_JITTER_MS + 1);
