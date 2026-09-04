@@ -13,6 +13,13 @@
 
 RGB_MATRIX_EFFECT(PALETTEFX_REACTIVE_DARK)
 
+// Solid-highlights the fighting-game GAME layer's addressable keys (WASD,
+// grab/Ctrl, the six attack buttons, Tab/F/R/C) and does a slow, dim hue
+// wave across everything else. Swapped in/out by GAME_TOG in keymap.c
+// (saving/restoring whatever mode was active before), not selected via
+// RM_NEXT, since it's only meaningful while GAME is actually on.
+RGB_MATRIX_EFFECT(GAME_MODE_HIGHLIGHT)
+
 #ifdef RGB_MATRIX_CUSTOM_EFFECT_IMPLS
 
 #include "palettefx.h"
@@ -157,6 +164,68 @@ static bool PALETTEFX_REACTIVE_DARK(effect_params_t* params) {
     rgb_matrix_set_color(i, rgb.r, rgb.g, rgb.b);
   }
   return rgb_matrix_check_finished_leds(led_max);
+}
+
+// Matrix positions of the GAME layer's addressable keys, verified against
+// keyboards/keychron/k8_pro/info.json's LAYOUT_tkl_ansi "matrix" fields
+// (cross-checked against each key's x/y there) rather than assumed from
+// keymap.c's argument order -- this keymap already found one silent
+// wrong-assumption bug from skipping that kind of verification (see the
+// `enum layers` comment in keymap.c), not eager to add a second.
+static const keypos_t GAME_MODE_ADDRESSABLE_KEYS[] = {
+    {.row = 2, .col = 2},  // W
+    {.row = 3, .col = 1},  // A
+    {.row = 3, .col = 2},  // S
+    {.row = 3, .col = 3},  // D
+    {.row = 5, .col = 0},  // Ctrl (grab)
+    {.row = 1, .col = 14}, // Ins
+    {.row = 2, .col = 14}, // Del
+    {.row = 1, .col = 15}, // Home
+    {.row = 2, .col = 15}, // End
+    {.row = 1, .col = 16}, // PgUp
+    {.row = 2, .col = 16}, // PgDn
+    {.row = 2, .col = 0},  // Tab (MACRO_FACE_TOG)
+    {.row = 3, .col = 4},  // F (MACRO_HALF_CIRCLE)
+    {.row = 2, .col = 4},  // R (MACRO_DP)
+    {.row = 4, .col = 4},  // C (MACRO_360)
+};
+
+static bool game_mode_addressable[RGB_MATRIX_LED_COUNT];
+static bool game_mode_addressable_ready = false;
+
+static void ensure_game_mode_addressable(void) {
+    if (game_mode_addressable_ready) { return; }
+    for (uint8_t i = 0; i < ARRAY_SIZE(GAME_MODE_ADDRESSABLE_KEYS); ++i) {
+        const keypos_t pos = GAME_MODE_ADDRESSABLE_KEYS[i];
+        const uint8_t  led = g_led_config.matrix_co[pos.row][pos.col];
+        if (led != NO_LED) {
+            game_mode_addressable[led] = true;
+        }
+    }
+    game_mode_addressable_ready = true;
+}
+
+static bool GAME_MODE_HIGHLIGHT(effect_params_t* params) {
+    RGB_MATRIX_USE_LIMITS(led_min, led_max);
+    ensure_game_mode_addressable();
+
+    // Hue drifts by x-position plus a slowly incrementing phase -- a full
+    // wave sweep takes several seconds, low saturation/value so it reads as
+    // calm background motion, not competing for attention with the solid
+    // highlight color.
+    const uint8_t wave_phase = (uint8_t)(timer_read32() >> 6);
+
+    for (uint8_t i = led_min; i < led_max; ++i) {
+        RGB_MATRIX_TEST_LED_FLAGS();
+        if (game_mode_addressable[i]) {
+            rgb_matrix_set_color(i, 0, 200, 255); // Same cyan as the GAME_TOG indicator flash.
+        } else {
+            const hsv_t hsv = {.h = (uint8_t)(g_led_config.point[i].x + wave_phase), .s = 180, .v = 40};
+            const rgb_t rgb = rgb_matrix_hsv_to_rgb(hsv);
+            rgb_matrix_set_color(i, rgb.r, rgb.g, rgb.b);
+        }
+    }
+    return rgb_matrix_check_finished_leds(led_max);
 }
 
 #endif  // RGB_MATRIX_CUSTOM_EFFECT_IMPLS

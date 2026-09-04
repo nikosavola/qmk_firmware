@@ -132,6 +132,11 @@ socd_cleaner_t socd_opposing_pairs[] = {
 
 extern uint8_t is_orgb_mode;
 
+// Whatever RGB Matrix mode was active before GAME_TOG switched to
+// GAME_MODE_HIGHLIGHT, so it can be restored on toggle-off instead of
+// always dropping back to the compiled default.
+static uint8_t game_saved_rgb_mode;
+
 bool process_record_user(uint16_t keycode, keyrecord_t *record) {
     switch (keycode) {
         case SWITCH_MODE:
@@ -169,6 +174,16 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
         case GAME_TOG:
             if (record->event.pressed) {
                 layer_invert(GAME);
+                if (layer_state_is(GAME)) {
+                    game_saved_rgb_mode = rgb_matrix_get_mode();
+                    rgb_matrix_mode_noeeprom(RGB_MATRIX_CUSTOM_GAME_MODE_HIGHLIGHT);
+                } else {
+                    // _noeeprom on both sides: this is a temporary mode
+                    // swap, not a real setting change -- shouldn't wear
+                    // EEPROM, and shouldn't overwrite the mode you'd
+                    // actually saved via RM_NEXT/VIA.
+                    rgb_matrix_mode_noeeprom(game_saved_rgb_mode);
+                }
                 RGB color = layer_state_is(GAME) ? (RGB){0, 200, 255} : (RGB){128, 128, 128};
                 backlight_indicator_start(250, 250, 3, color);
             }
