@@ -79,6 +79,31 @@ than one keypress:
   `Fn+PgDn`, which flashes the board green (on) or red (off) to confirm the new state. Fires on
   firmware keycodes before the OS's Dvorak layer sees anything, so it's unaffected by which OS
   keyboard layout is active.
+- **NKRO** — on by default (`NKRO_DEFAULT_ON`), so a WASD direction held alongside an attack
+  button doesn't silently get dropped the way 6KRO can under enough simultaneous keys.
+
+## Fighting-game layer
+
+Ins/Del/Home/End/PgUp/PgDn and Ctrl are this keymap's attack buttons/grab — they already send
+themselves on the base layer with no remapping needed; NKRO above was the actual fix required to
+chord them reliably. On top of that, a toggleable `GAME` layer adds offline-only motion macros for
+inputs that are awkward to hit cleanly by hand:
+
+| Trigger | Action |
+|---|---|
+| **`Fn+Enter`** | Toggles the `GAME` layer on/off (RGB flash confirms the new state). |
+| **`Tab`** (while `GAME` is on) | Flips which side of the screen the motions below treat as "forward" — flip this after a cross-up or your character otherwise switches sides. |
+| **`F`** (Dvorak `U`) | Half-circle forward. |
+| **`R`** (Dvorak `P`) | Dragon punch / "Z" motion. |
+| **`C`** (Dvorak `J`) | 360. |
+
+Motions are direction-only: you press the attack button yourself right after, on purpose, so
+combo-confirm timing stays a real skill instead of being macro'd away. This is meant for offline
+play only — most fighting games' own rulesets ban macro'd special-move motions (unlike SOCD, which
+every ruleset allows since it just resolves a keyboard limitation) — so the `GAME` layer's on/off
+state isn't persisted across a reboot. Implementation, including the timing/jitter and the
+facing-toggle logic, lives in
+[`keymaps/niko/motion_macros.h`](keyboards/keychron/k8_pro/ansi/rgb/keymaps/niko/motion_macros.h).
 
 ## Fork lineage
 
