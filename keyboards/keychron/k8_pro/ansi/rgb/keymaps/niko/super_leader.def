@@ -7,5 +7,10 @@
 //
 // Add more of your own here -- see modules/getreuer/super_leader/README.md.
 
-// LEADER, B, O, O, T -> reboot into the bootloader (for flashing).
-SEQ_KEY(boot, (KC_B, KC_O, KC_O, KC_T), QK_BOOT)
+// LEADER, then the physical keys that read "B", "O", "O", "T" on Dvorak
+// keycaps -> reboot into the bootloader (for flashing). These are QWERTY
+// firmware keycodes naming physical positions (fires before the OS's Dvorak
+// layer sees anything, same as everywhere else in this keymap), chosen so
+// the sequence still spells BOOT on hardware with Dvorak-printed keycaps:
+// physical N/S/S/K are what Dvorak maps to B/O/O/T respectively.
+SEQ_KEY(boot, (KC_N, KC_S, KC_S, KC_K), QK_BOOT)
