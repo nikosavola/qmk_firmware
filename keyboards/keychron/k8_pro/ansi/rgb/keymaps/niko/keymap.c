@@ -19,6 +19,18 @@
 #include "backlit_indicator.h"
 #include "xcase.h"
 #include "motion_macros.h"
+#include "keychron_debounce.h"
+
+// debounce_time_set() isn't in keychron_debounce.h (only debounce_config_reset() is), but it's a
+// plain non-static global -- just updates the in-RAM debounce_time counter threshold, no EEPROM
+// write, no need to reinitialize the whole debounce algorithm (sym_eager_pk reads it fresh per
+// keypress). Declared here since Keychron only expects raw HID/VIA to call it.
+extern void debounce_time_set(uint8_t time);
+
+// Lower than the DEBOUNCE baseline in config.h -- fighting games are the one case here where
+// shaving a few more ms of same-key re-trigger delay (for double-taps/dashes, rapid mashing)
+// outweighs the extra chatter-safety margin daily typing wants.
+#define GAME_DEBOUNCE_MS 5
 
 // Explicit values, NOT sequential auto-increment -- two constraints fight
 // over the numbering and both are load-bearing:
@@ -177,12 +189,14 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
                 if (layer_state_is(GAME)) {
                     game_saved_rgb_mode = rgb_matrix_get_mode();
                     rgb_matrix_mode_noeeprom(RGB_MATRIX_CUSTOM_GAME_MODE_HIGHLIGHT);
+                    debounce_time_set(GAME_DEBOUNCE_MS);
                 } else {
-                    // _noeeprom on both sides: this is a temporary mode
-                    // swap, not a real setting change -- shouldn't wear
-                    // EEPROM, and shouldn't overwrite the mode you'd
+                    // _noeeprom/debounce_time_set on both sides: temporary
+                    // swaps, not real setting changes -- shouldn't wear
+                    // EEPROM, and shouldn't overwrite the RGB mode you'd
                     // actually saved via RM_NEXT/VIA.
                     rgb_matrix_mode_noeeprom(game_saved_rgb_mode);
+                    debounce_time_set(DEBOUNCE);
                 }
                 RGB color = layer_state_is(GAME) ? (RGB){0, 200, 255} : (RGB){128, 128, 128};
                 backlight_indicator_start(250, 250, 3, color);
@@ -213,6 +227,17 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
     }
 
     return true;
+}
+
+// debounce_init() (keychron_debounce.c) reads its type/time from EEPROM,
+// not from the compiled DEBOUNCE value, once general eeconfig is already
+// enabled -- which it always is on hardware that's been flashed before.
+// Lowering DEBOUNCE in config.h alone does nothing on already-running
+// boards; debounce_config_reset() force-writes the current compiled value.
+// Safe to call every boot: eeprom_update_byte() only actually writes when
+// the stored byte differs, so this is a no-op (no extra wear) once adopted.
+void keyboard_post_init_user(void) {
+    debounce_config_reset();
 }
 
 // GAME_TOG's rgb_matrix_mode_noeeprom() call above gets silently undone a

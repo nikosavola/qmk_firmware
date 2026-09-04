@@ -52,6 +52,20 @@
 // Safe here because this board doesn't enable COMMAND_ENABLE (same chord).
 #define BOTH_SHIFTS_TURNS_ON_CAPS_WORD
 
+// Keychron ships every hot-swappable mechanical board in their whole
+// lineup -- not just this one -- with the same info.json "debounce": 50,
+// while their Hall-effect boards use 0 and their optical/8K boards use 30.
+// That pattern (one number picked to be safe for whatever third-party
+// switch someone hot-swaps in, not tuned to this board's actual switches)
+// plus QMK's own default of 5ms and community consensus that most chatter
+// fixes only need 8-15ms both point at 50 being far more conservative than
+// this board's stock switches need. 15 keeps a real safety margin over
+// stock while cutting the worst-case same-key re-trigger delay by >3x.
+// Doesn't take effect on its own -- see keyboard_post_init_user() in
+// keymap.c for why a compiled DEBOUNCE change needs forcing onto already-
+// initialized hardware.
+#define DEBOUNCE 15
+
 // Boot straight into NKRO instead of 6KRO. Without this, NKRO_ENABLE only
 // makes NKRO available; USB still boots 6KRO until toggled at runtime, which
 // is easy to forget and then silently drop a simultaneous direction+attack
