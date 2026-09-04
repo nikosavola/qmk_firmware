@@ -99,7 +99,11 @@ static uint8_t motion_jittered_step_ms(void) {
         motion_rng_state  = timer_read32();
         motion_rng_seeded = true;
     }
-    const uint8_t jitter = motion_next_rand() % (2 * MOTION_STEP_JITTER_MS + 1);
+    // Lemire's multiplicative range reduction instead of %: on this MCU it compiles to a single
+    // umull instead of udiv+add+sub (verified via objdump), and uses the high bits of the
+    // multiply rather than the low bits of the raw value.
+    const uint32_t raw    = motion_next_rand();
+    const uint8_t  jitter = (uint8_t)(((uint64_t)raw * (2 * MOTION_STEP_JITTER_MS + 1)) >> 32);
     return MOTION_STEP_BASE_MS - MOTION_STEP_JITTER_MS + jitter;
 }
 
