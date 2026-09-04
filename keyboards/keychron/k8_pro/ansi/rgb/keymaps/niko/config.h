@@ -52,6 +52,14 @@
 // Safe here because this board doesn't enable COMMAND_ENABLE (same chord).
 #define BOTH_SHIFTS_TURNS_ON_CAPS_WORD
 
+// Boot straight into NKRO instead of 6KRO. Without this, NKRO_ENABLE only
+// makes NKRO available; USB still boots 6KRO until toggled at runtime, which
+// is easy to forget and then silently drop a simultaneous direction+attack
+// press mid-combo in a fighting game. FORCE_NKRO (the older equivalent) is
+// deprecated as of this QMK version -- it also re-forces NKRO on every boot
+// even after an explicit NK_OFF, whereas this only sets the EEPROM default.
+#define NKRO_DEFAULT_ON true
+
 // PaletteFx: all effects and palettes, cycled with RM_NEXT/RM_PREV and
 // RM_HUEU/RM_HUED respectively.
 #define PALETTEFX_ENABLE_ALL_EFFECTS
