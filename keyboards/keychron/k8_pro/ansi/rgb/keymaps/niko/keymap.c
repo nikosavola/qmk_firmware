@@ -144,6 +144,65 @@ socd_cleaner_t socd_opposing_pairs[] = {
 
 extern uint8_t is_orgb_mode;
 
+// Sentence Case's own default sentence_case_press_user() classifies keys by
+// what they'd type under QWERTY: KC_DOT/KC_COMM/KC_SLSH as punctuation,
+// KC_Q/KC_W/KC_E/KC_SCLN as letters or quote. Under Dvorak those are wrong
+// in both directions -- physical KC_DOT actually types "v" (a letter, not a
+// period), so finishing a word with Dvorak "v" was tricking Sentence Case
+// into capitalizing the next word; meanwhile physical KC_E, which actually
+// types Dvorak's real ".", was being treated as an ordinary letter, so real
+// sentence endings weren't triggering capitalization at all. This overrides
+// the (weak) default with the correct physical-key classification instead.
+//
+// Verified Dvorak mapping (physical QWERTY-named key -> what Dvorak types):
+//   KC_Q -> ' (quote)     KC_W -> , (symbol)   KC_E -> . (period)
+//   KC_Z -> ; (symbol)    KC_SCLN -> s (letter)
+//   KC_DOT -> v (letter)  KC_COMM -> w (letter)  KC_SLSH -> z (letter),
+//   Shift+KC_SLSH -> ? (still a terminator, same as stock)
+char sentence_case_press_user(uint16_t keycode, keyrecord_t *record, uint8_t mods) {
+    if ((mods & ~(MOD_MASK_SHIFT | MOD_BIT(KC_RALT))) == 0) {
+        const bool shifted = mods & MOD_MASK_SHIFT;
+        switch (keycode) {
+            case KC_A ... KC_D: // Letter keys whose Dvorak output is also a letter.
+            case KC_F ... KC_P:
+            case KC_R ... KC_V:
+            case KC_X ... KC_Z:
+            case KC_SCLN: // Dvorak S.
+            case KC_DOT:  // Dvorak V.
+            case KC_COMM: // Dvorak W.
+                return 'a';
+
+            case KC_SLSH: // Dvorak Z unshifted, Dvorak ? shifted.
+                return shifted ? '.' : 'a';
+
+            case KC_E: // Dvorak's actual period key.
+                return '.';
+
+            case KC_1:
+                return shifted ? '.' : '#';
+            case KC_2 ... KC_0:       // 2 3 4 5 6 7 8 9 0
+            case KC_AT ... KC_RPRN:   // @ # $ % ^ & * ( )
+            case KC_MINS ... KC_NUHS: // - = [ ] backslash (Dvorak shuffles these among
+                                      // themselves, none becomes a letter or period)
+            case KC_UNDS ... KC_COLN: // _ + { } | :
+            case KC_GRV:
+            case KC_W:      // Dvorak comma.
+            case KC_QUOT:   // Dvorak hyphen (see the XCASE_SNAKE_DVORAK comment above).
+                return '#'; // Symbol key.
+
+            case KC_SPC:
+                return ' '; // Space key.
+
+            case KC_Q: // Dvorak apostrophe.
+                return '\'';
+        }
+    }
+
+    // Otherwise clear Sentence Case to initial state.
+    sentence_case_clear();
+    return '\0';
+}
+
 // Whatever RGB Matrix mode was active before GAME_TOG switched to
 // GAME_MODE_HIGHLIGHT, so it can be restored on toggle-off instead of
 // always dropping back to the compiled default.
