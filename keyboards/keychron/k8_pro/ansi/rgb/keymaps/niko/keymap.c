@@ -20,18 +20,37 @@
 #include "xcase.h"
 #include "motion_macros.h"
 
-// Order here is numeric layer priority, not OS-mode grouping: QMK resolves a
-// keypress against the highest-numbered *active* layer that defines it. GAME
-// must outrank both base layers (so its overlay wins while toggled on), but
-// must NOT outrank either FN layer -- otherwise holding FN while GAME is on
-// would let GAME's motion-macro keycodes shadow FN's RGB/system shortcuts at
-// the same physical positions (Tab/F/R/C) instead of falling through to them.
+// Explicit values, NOT sequential auto-increment -- two constraints fight
+// over the numbering and both are load-bearing:
+//
+// 1. keyboards/keychron/k8_pro/k8_pro.c's dip_switch_update_kb() hardcodes
+//    `default_layer_set(1UL << (active ? 2 : 0))` for the physical Mac/Win
+//    switch. That's keyboard-level code we can't override (not weak), so
+//    MAC_BASE must be exactly 0 and WIN_BASE must be exactly 2, always.
+//    Sequentially renumbering this enum (as an earlier version of this file
+//    did, to fix constraint 2 below) silently broke constraint 1 instead:
+//    flipping the dip switch to Windows started setting layer 2 as default,
+//    which was GAME under that renumbering -- toggling GAME_TOG then just
+//    flipped a layer_state bit that default_layer_state already forced on,
+//    so the board could never actually leave GAME once the dip switch had
+//    ever landed on Windows. Only caught after flashing to real hardware.
+// 2. GAME must outrank whichever base layer is currently default (so its
+//    overlay wins while toggled on), but must NOT outrank either FN layer
+//    -- otherwise holding FN while GAME is on would let GAME's motion-macro
+//    keycodes shadow FN's RGB/system shortcuts at the same physical
+//    positions (Tab/F/R/C) instead of falling through to them.
+//
+// Index 1 is an intentionally unused gap (wastes one layer's worth of
+// flash, a few hundred bytes -- negligible here) since no value satisfies
+// both constraints without it: WIN_BASE is pinned to 2, so GAME must be >2,
+// which leaves nothing between MAC_BASE(0) and WIN_BASE(2) for an FN layer
+// to occupy without also being numerically below GAME.
 enum layers {
-    MAC_BASE,
-    WIN_BASE,
-    GAME, // Toggled overlay (FN+Enter); sits above both Mac and Windows base layers.
-    MAC_FN,
-    WIN_FN,
+    MAC_BASE = 0,
+    WIN_BASE = 2,
+    GAME     = 3, // Toggled overlay (FN+Enter).
+    MAC_FN   = 4,
+    WIN_FN   = 5,
 };
 
 enum custom_keycodes {
