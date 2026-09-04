@@ -1,7 +1,7 @@
 # niko's QMK firmware
 
 Personal keyboard bindings, based on a Keychron K8 Pro with OpenRGB support ported forward onto
-Keychron's current fork. Keymap source: `keyboards/keychron/k8_pro/ansi/rgb/keymaps/niko/`.
+Keychron's current fork. Keymap source: [`keyboards/keychron/k8_pro/ansi/rgb/keymaps/niko/`](keyboards/keychron/k8_pro/ansi/rgb/keymaps/niko/).
 
 ## Layers
 
