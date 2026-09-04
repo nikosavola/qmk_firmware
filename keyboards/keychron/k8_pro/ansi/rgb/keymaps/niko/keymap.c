@@ -214,3 +214,17 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
 
     return true;
 }
+
+// GAME_TOG's rgb_matrix_mode_noeeprom() call above gets silently undone a
+// couple seconds later: backlight_indicator_start()'s flash ends by calling
+// backlight_indicator_stop() -> indicator_eeconfig_reload(), which does an
+// unconditional eeprom_read_block() over the whole rgb_matrix_config
+// struct, mode field included -- so it reverts straight back to whatever's
+// actually persisted in EEPROM regardless of what we just set in RAM.
+// Rather than race that timing (fragile, and not just our own flash could
+// trigger it), keep re-asserting the mode every scan while GAME is active.
+void housekeeping_task_user(void) {
+    if (layer_state_is(GAME) && rgb_matrix_get_mode() != RGB_MATRIX_CUSTOM_GAME_MODE_HIGHLIGHT) {
+        rgb_matrix_mode_noeeprom(RGB_MATRIX_CUSTOM_GAME_MODE_HIGHLIGHT);
+    }
+}
