@@ -80,7 +80,7 @@ enum custom_keycodes {
     MACRO_HALF_CIRCLE  = QK_USER_5,
     MACRO_DP           = QK_USER_6,
     MACRO_360          = QK_USER_7,
-    CODE_FENCE         = QK_USER_8, // Types ``` (markdown code fence).
+    CODE_FENCE         = QK_USER_8, // Types ```; shifted, a full fenced code block.
 };
 
 #define FN_MAC MO(MAC_FN)
@@ -286,7 +286,21 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
             return false;
         case CODE_FENCE:
             if (record->event.pressed) {
-                SEND_STRING("```");
+                if (get_mods() & MOD_MASK_SHIFT) {
+                    // Fenced code block: opening/closing fences with a
+                    // blank line between them, cursor left on that line.
+                    // Shift is physically still held from Fn+Shift+` here,
+                    // so clear it first -- otherwise it fights with
+                    // send_string's own per-character shift taps and some
+                    // characters come out with the wrong case/shift state.
+                    uint8_t saved_mods = get_mods();
+                    clear_mods();
+                    clear_weak_mods();
+                    SEND_STRING("```" SS_TAP(X_ENTER) SS_TAP(X_ENTER) "```" SS_TAP(X_UP));
+                    set_mods(saved_mods);
+                } else {
+                    SEND_STRING("```");
+                }
             }
             return false;
     }
