@@ -1,0 +1,92 @@
+name: Sync Keychron 2025q3
+
+on:
+  schedule:
+    # 06:00 UTC on Jan 1 and Jul 1
+    - cron: "0 6 1 1,7 *"
+  workflow_dispatch:
+
+permissions: {}
+
+concurrency:
+  group: ${{ github.workflow }}
+  cancel-in-progress: false
+
+jobs:
+  sync:
+    if: github.repository == 'nikosavola/qmk_firmware'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+
+    strategy:
+      fail-fast: false
+      matrix:
+        target:
+          - k8_pro_openrgb_ansi_2025q3
+          - niko
+
+    env:
+      UPSTREAM_URL: https://github.com/Keychron/qmk_firmware.git
+      UPSTREAM_BRANCH: 2025q3
+      TARGET: ${{ matrix.target }}
+      # Pushing upstream changes to .github/workflows needs a PAT with the
+      # workflow scope, the default token is refused. Optional secret.
+      GH_TOKEN: ${{ secrets.SYNC_TOKEN || github.token }}
+
+    steps:
+      - name: Checkout target branch
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ matrix.target }}
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Merge upstream into sync branch
+        id: merge
+        run: |
+          sync_branch="sync/keychron-${UPSTREAM_BRANCH}/${TARGET}"
+          echo "sync_branch=${sync_branch}" >> "$GITHUB_OUTPUT"
+
+          if [ -n "$(gh pr list --head "$sync_branch" --state open --json number --jq '.[].number')" ]; then
+            echo "Sync PR already open for ${TARGET}, skipping."
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          git remote add keychron "$UPSTREAM_URL"
+          git fetch --no-tags keychron "$UPSTREAM_BRANCH"
+
+          if git merge-base --is-ancestor "keychron/${UPSTREAM_BRANCH}" HEAD; then
+            echo "${TARGET} already contains keychron/${UPSTREAM_BRANCH}."
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+          git switch -c "$sync_branch"
+          if ! git merge --no-ff -m "Merge Keychron ${UPSTREAM_BRANCH} into ${TARGET}" "keychron/${UPSTREAM_BRANCH}"; then
+            echo "::error::Merge conflicts merging keychron/${UPSTREAM_BRANCH} into ${TARGET}. Merge it by hand."
+            git status --short | grep -E '^(UU|AA|DD|AU|UA|DU|UD) ' || true
+            exit 1
+          fi
+          echo "changed=true" >> "$GITHUB_OUTPUT"
+
+      - name: Push and open PR
+        if: steps.merge.outputs.changed == 'true'
+        env:
+          SYNC_BRANCH: ${{ steps.merge.outputs.sync_branch }}
+        run: |
+          git push --force \
+            "https://x-access-token:${GH_TOKEN}@github.com/${GITHUB_REPOSITORY}.git" \
+            "HEAD:refs/heads/${SYNC_BRANCH}"
+
+          count=$(git rev-list --count "origin/${TARGET}..HEAD" --no-merges)
+          gh pr create \
+            --base "$TARGET" \
+            --head "$SYNC_BRANCH" \
+            --title "Merge Keychron ${UPSTREAM_BRANCH} into ${TARGET}" \
+            --body "Twice-yearly sync. Merges the latest Keychron/qmk_firmware ${UPSTREAM_BRANCH} into ${TARGET}, ${count} new upstream commits. Check that the K8 Pro and the niko keymap still build before merging. Use a merge commit, not squash."
